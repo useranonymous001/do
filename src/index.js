@@ -17,23 +17,25 @@ const main = async () => {
   // await processor.tasks.copy("src.txt", "dest.txt");
 
   // await processor.tasks.compress("src.txt", "compressed.txt.gz");
-  await processor.tasks.split("src.txt", "CHUNKS");
+  // await processor.tasks.split("src.txt", "CHUNKS");
   // await processor.tasks.linecount("src.txt");
   // await processor.tasks.merge("CHUNKS", "merged.txt");
   // await processor.tasks.encrypt(
   //   "merged.txt",
   //   "12345678901234567890123456789012"
   // ); // it takes 24 bit key
-  await processor.tasks.decrypt(
-    "encrypted.enc",
-    "12345678901234567890123456789012"
-  );
+  // await processor.tasks.decrypt(
+  //   "encrypted.enc",
+  //   "12345678901234567890123456789012"
+  // );
   // await processor.tasks.csvtojson(
   //   "../streams_practice/data.csv",
   //   "../streams_practice/DB.json"
   // );
 
   // await processor.tasks.viewfile("../streams_practice/DB.json");
+
+  await processor.tasks.resize("image.png", 500, 500, "outside");
 };
 
 main();

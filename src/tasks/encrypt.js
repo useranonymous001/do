@@ -26,6 +26,7 @@ class Encrypt extends Transform {
 
   _transform(chunk, encoding, callback) {
     try {
+      console.log(typeof chunk);
       const encryptedChunk = this.cipher.update(chunk);
       this.push(encryptedChunk);
       callback();
@@ -38,7 +39,6 @@ class Encrypt extends Transform {
     try {
       const finalChunk = this.cipher.final();
       this.push(finalChunk);
-      // console.log(this.iv);
       this.push(this.iv); // pushed at the end for decryption
       callback;
     } catch (error) {
@@ -75,52 +75,3 @@ export default async function encrypt(inputFilePath, key) {
     console.log(`Error in encrypting: ${error.message}`);
   }
 }
-
-// class Encrypt extends Transform {
-
-// }
-
-// export default async function encrypt(inputFilePath) {
-//   const algorithm = "aes-192-cbc";
-//   const password = "this is fake password";
-
-//   const outputFilePath = `encrypted.enc`;
-
-//   const writeFileHandle = await fs.open(outputFilePath, "w");
-//   const writeStream = writeFileHandle.createWriteStream();
-
-//   const readFileHandle = await fs.open(inputFilePath, "r");
-//   const readStream = readFileHandle.createReadStream();
-
-//   try {
-//     scrypt(password, "salt", 24, (err, key) => {
-//       if (err) {
-//         throw err;
-//       }
-
-//       randomFill(new Uint8Array(16), (err, iv) => {
-//         if (err) throw err;
-
-//         const cipher = createCipheriv(algorithm, key, iv);
-
-//         pipeline(readStream, cipher, writeStream, (err) => {
-//           if (err) {
-//             console.log("err: ", err.message);
-//           }
-//         });
-//       });
-//     });
-
-//     // when the read stream closes
-//     readStream.on("end", () => {
-//       console.log("finished reading the contents");
-//     });
-
-//     // when the write stream closes
-//     writeStream.on("finish", () => {
-//       console.log("finished writing");
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// }
