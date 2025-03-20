@@ -35,7 +35,10 @@ const main = async () => {
 
   // await processor.tasks.viewfile("../streams_practice/DB.json");
 
-  await processor.tasks.resize("image.png", 500, 500, "outside");
+  // await processor.tasks.resize("image.png", 500, 500, "outside");
+
+  // await processor.tasks.hash("merged.txt", "sha256");
+  await processor.tasks.verify_hash("merged.txt", "sha256");
 };
 
 main();

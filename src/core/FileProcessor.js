@@ -176,6 +176,7 @@ export default class FileProcessor {
         "encrypt",
         "decrypt",
         "csvtojson",
+        "hash",
       ].includes(taskName);
 
       this.tasks[taskName] = isCPUHeavy
