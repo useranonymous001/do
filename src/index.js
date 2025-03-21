@@ -118,18 +118,64 @@ program
   });
 
 // await processor.tasks.linecount("src.txt");
-program.command("merge").description("merge multiple files into a single file");
-program.command("encrypt").description("encrypt any file using encryption key");
-program.command("decrypt").description("decrypt the encrypted file");
+program
+  .command("linecount")
+  .description("counts the lines of the contents in a file")
+  .argument("<filepath>", "path to the file to count line of")
+  .action(async (args) => {
+    await processor.tasks.linecount(args);
+  });
 
 // await processor.tasks.merge("CHUNKS", "merged.txt");
+program
+  .command("merge")
+  .description("merge multiple files into a single file")
+  .argument("<folder>", "path to the folder containing files to merge")
+  .option("-o, --output", "path to the save the merged file")
+  .option(
+    "-s, --size",
+    "choose the size of the chunk/block for each file in KB"
+  )
+  .action(async (args, options) => {
+    await processor.tasks.merge(args, options?.output);
+  });
+
 // await processor.tasks.encrypt(
-////   "merged.decrypt",   "merged.txt",
-//   "12345678901234567890123456789012"
+//   "merged.decrypt",   "merged.txt",
+//   "G9X3LQ7Y8V5W0Z2M4A1C6DJP"
 // ); // it takes 24 bit key
+program
+  .command("encrypt")
+  .description("encrypt any file using encryption key")
+  .argument("<filepath>", "path to the file to encrypt")
+  .option("-k, --key", "32-bit key to encrypt and decrypt")
+  .option("-o, --output", "path to the save the encrypted file")
+  .action(async (args, options) => {
+    if (!options.key) {
+      console.log(
+        "Alert!!\nUse 32 bit key to make it secure\nUsing default key\n"
+      );
+    }
+    await processor.tasks.encrypt(args, options?.key, options?.output);
+  });
+
 // await processor.tasks.decrypt(
 //   "encrypted.enc",
 //   "12345678901234567890123456789012"
 // );
+program
+  .command("decrypt")
+  .description("decrypt the encrypted file using encryption key")
+  .argument("<filepath>", "path to the file to decrypt")
+  .option("-k, --key", "32-bit key to decrypt")
+  .option("-o, --output", "path to the save the decrypted file")
+  .action(async (args, options) => {
+    if (!options.key) {
+      console.log(
+        "Alert!!\nUse 32 bit key\nUsing default key that may have been used to encrypt earlier\n"
+      );
+    }
+    await processor.tasks.decrypt(args, options?.key, options?.output);
+  });
 
 program.parse(process.argv);

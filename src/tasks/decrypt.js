@@ -17,6 +17,7 @@ how to use:
 import { pipeline, Transform } from "node:stream";
 import fs from "node:fs/promises";
 import { createDecipheriv } from "node:crypto";
+import path from "node:path";
 
 class Decrypt extends Transform {
   constructor(key) {
@@ -66,15 +67,25 @@ class Decrypt extends Transform {
   }
 }
 
-export default async function decrypt(inputFilePath, key) {
+export default async function decrypt(inputFilePath, key, outputFilePath) {
   try {
-    const writeFd = await fs.open("decrypted.txt", "w");
-    const readFd = await fs.open(inputFilePath, "r");
+    const sourcePath = path.resolve(inputFilePath);
+    const encKey = key ? key : "G9X3LQ7Y8V5W0Z2M4A1C6DJP4A1C6DJP";
+    const destPath = outputFilePath
+      ? outputFilePath
+      : `${path
+          .basename(sourcePath)
+          .split(".")
+          .slice(0, -1)
+          .join("")}_decrypted.txt`;
+
+    const writeFd = await fs.open(destPath, "w");
+    const readFd = await fs.open(sourcePath, "r");
 
     const writeStream = writeFd.createWriteStream();
     const readStream = readFd.createReadStream();
 
-    const decryptFile = new Decrypt(key);
+    const decryptFile = new Decrypt(encKey);
 
     pipeline(readStream, decryptFile, writeStream, (err) => {
       if (err) {

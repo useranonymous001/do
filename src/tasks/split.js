@@ -6,6 +6,7 @@
  *
  * todo: need to optimize more to create less folders.
  * todo: use pipeline and more error handler to create error and faster processing
+ * todo: option to choose the size of the chunk in KB
  */
 
 import fs from "node:fs";
@@ -23,7 +24,7 @@ export default async function split(inputFilePath, outputDir) {
     const sourcePath = path.resolve(inputFilePath);
 
     const readStream = fs.createReadStream(sourcePath, {
-      highWaterMark: 64 * 1024,
+      highWaterMark: 64 * 1024 * 10,
     });
 
     readStream.on("data", (chunk) => {
@@ -38,9 +39,6 @@ export default async function split(inputFilePath, outputDir) {
 
       writeStream.on("drain", () => {
         readStream.resume();
-      });
-      writeStream.on("finish", () => {
-        console.log(`Wrote ${chunk_index} chunk of data to ${filepath}`);
       });
 
       readStream.on("end", () => {

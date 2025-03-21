@@ -15,6 +15,7 @@ how to use:
 import { pipeline, Transform } from "node:stream";
 import fs from "node:fs/promises";
 import { randomBytes, createCipheriv } from "node:crypto";
+import path from "node:path";
 
 class Encrypt extends Transform {
   constructor(key) {
@@ -26,7 +27,6 @@ class Encrypt extends Transform {
 
   _transform(chunk, encoding, callback) {
     try {
-      console.log(typeof chunk);
       const encryptedChunk = this.cipher.update(chunk);
       this.push(encryptedChunk);
       callback();
@@ -40,36 +40,45 @@ class Encrypt extends Transform {
       const finalChunk = this.cipher.final();
       this.push(finalChunk);
       this.push(this.iv); // pushed at the end for decryption
-      callback;
+      callback();
     } catch (error) {
       callback(error);
     }
   }
 }
 
-export default async function encrypt(inputFilePath, key) {
+export default async function encrypt(inputFilePath, key, outputFilePath) {
   try {
-    const writeFd = await fs.open("encrypted.enc", "w");
-    const readFd = await fs.open(inputFilePath, "r");
+    const sourcePath = path.resolve(inputFilePath);
+    const encKey = key ? key : "G9X3LQ7Y8V5W0Z2M4A1C6DJP4A1C6DJP";
+    const destPath = outputFilePath
+      ? outputFilePath
+      : `${path
+          .basename(sourcePath)
+          .split(".")
+          .slice(0, -1)
+          .join("")}_encrypted.enc`;
+
+    const writeFd = await fs.open(destPath, "w");
+    const readFd = await fs.open(sourcePath, "r");
 
     const writeStream = writeFd.createWriteStream();
     const readStream = readFd.createReadStream();
 
-    const encrypt = new Encrypt(key);
-    // console.log(encrypt.iv);
+    const encrypt = new Encrypt(encKey);
+
+    readStream.on("end", () => {
+      console.log("");
+    });
+
+    writeStream.on("finish", () => {
+      console.log("Done !!");
+    });
 
     pipeline(readStream, encrypt, writeStream, (err) => {
       if (err) {
         console.log(`Pipeline err: ${err.message}`);
       }
-    });
-
-    readStream.on("end", () => {
-      console.log("finished reading..");
-    });
-
-    writeStream.on("finish", () => {
-      console.log("finished writing..");
     });
   } catch (error) {
     console.log(`Error in encrypting: ${error.message}`);
