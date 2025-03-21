@@ -35,6 +35,7 @@ export default class FileProcessor {
         "decrypt",
         "csvtojson",
         "hash",
+        "csvtojson",
       ].includes(taskName);
 
       this.tasks[taskName] = isCPUHeavy
@@ -51,7 +52,9 @@ export default class FileProcessor {
         });
 
         worker.on("message", (data) => {
-          console.log(`Task Allocated to Worker: ${data.message}`);
+          console.log(
+            `Task Allocated to Worker ${worker.threadId} \n${data.message}`
+          );
           resolve(data);
           this.workerPool = this.workerPool.filter((w) => w !== worker);
           this.assignNextTask();

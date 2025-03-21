@@ -29,10 +29,6 @@ await processor.loadTasks();
 //   "encrypted.enc",
 //   "12345678901234567890123456789012"
 // );
-// await processor.tasks.csvtojson(
-//   "../streams_practice/data.csv",
-//   "../streams_practice/DB.json"
-// );
 
 program.name("do").description("cli tool").version("1.0.1");
 
@@ -85,7 +81,6 @@ program
 
 // await processor.tasks.viewfile("../streams_practice/DB.json");
 // todo: read specific lines of files
-
 program
   .command("viewfile")
   .description("read any size of files in the chunk by chunk")
@@ -94,6 +89,19 @@ program
   .option("-b, --bottom <number>", "read the bottom n lines of the files")
   .action(async (args, options) => {
     await processor.tasks.viewfile(args);
+  });
+
+// await processor.tasks.csvtojson(
+//   "../streams_practice/data.csv",
+//   "../streams_practice/DB.json"
+// );
+program
+  .command("csvtojson")
+  .description("convert your csv file to json")
+  .option("-i, --input <char>", "path to your csv data file")
+  .option("-o, --output <char>", "path to your output json data file")
+  .action(async (args, options) => {
+    await processor.tasks.csvtojson(args.input, args.output);
   });
 
 program.parse(process.argv);
