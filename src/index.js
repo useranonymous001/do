@@ -6,29 +6,7 @@ import { program } from "commander";
 // todo: initialize all the here and assign to the cluster manager later on
 
 const processor = new FileProcessor(path.resolve("./tasks"), 4);
-// await file.processFile("src.txt", "dest.txt", "copy");
-// await file.processFile("src.txt", null, "linecount");
-// await file.processFile("src.txt", "out.txt.gz", "compress");
-// await file.processFile("src.txt", null, "split");
 await processor.loadTasks();
-// await processor.loadTasks("./tasks", 4);
-
-// await processor.executeTasks("copy", "src.txt", "dest.txt");
-
-// await processor.tasks.copy("src.txt", "dest.txt");
-
-// await processor.tasks.compress("src.txt", "compressed.txt.gz");
-// await processor.tasks.split("src.txt", "CHUNKS");
-// await processor.tasks.linecount("src.txt");
-// await processor.tasks.merge("CHUNKS", "merged.txt");
-// await processor.tasks.encrypt(
-//   "merged.txt",
-//   "12345678901234567890123456789012"
-// ); // it takes 24 bit key
-// await processor.tasks.decrypt(
-//   "encrypted.enc",
-//   "12345678901234567890123456789012"
-// );
 
 program.name("do").description("cli tool").version("1.0.1");
 
@@ -103,5 +81,28 @@ program
   .action(async (args, options) => {
     await processor.tasks.csvtojson(args.input, args.output);
   });
+
+// await processor.tasks.copy("src.txt", "dest.txt");
+program
+  .command("copy")
+  .description("copy the contents from one file to another")
+  .option("-i, --input <char>", "path to the source file to copy")
+  .option("-o, --output <char>", "path to the destination file to copy")
+  .action(async (args, options) => {
+    await processor.tasks.copy(args.input, args.output);
+  });
+
+// await processor.tasks.compress("src.txt", "compressed.txt.gz");
+// await processor.tasks.split("src.txt", "CHUNKS");
+// await processor.tasks.linecount("src.txt");
+// await processor.tasks.merge("CHUNKS", "merged.txt");
+// await processor.tasks.encrypt(
+//   "merged.txt",
+//   "12345678901234567890123456789012"
+// ); // it takes 24 bit key
+// await processor.tasks.decrypt(
+//   "encrypted.enc",
+//   "12345678901234567890123456789012"
+// );
 
 program.parse(process.argv);
