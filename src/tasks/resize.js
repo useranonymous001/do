@@ -12,31 +12,68 @@
 import { pipeline, Transform } from "stream";
 import fs from "node:fs";
 import sharp from "sharp";
+import path from "node:path";
 
-export default async function resize(iamgePath, height = 800, width = 800) {
-  const readStream = fs.createReadStream(iamgePath);
-  const writeStream = fs.createWriteStream(`resized.png`);
+export default async function resize(
+  iamgePath,
+  height = 800,
+  width = 800,
+  fit = "fill"
+) {
+  const inputImagePath = path.resolve(iamgePath);
+  const outputImagePath = `${path
+    .basename(inputImagePath)
+    .split(".")
+    .slice(0, -1)
+    .join("")}_resized${path.extname(inputImagePath)}`;
+
+  const readStream = fs.createReadStream(inputImagePath);
+  const writeStream = fs.createWriteStream(outputImagePath);
+
+  const options = {
+    height: parseInt(height),
+    width: parseInt(width),
+    fit: fit,
+  };
 
   const imageResizer = new Transform({
     highWaterMark: 64 * 1024,
-    transform(chunk, encoding, callback) {
-      sharp(chunk)
-        .resize({ height, width, fit: "fill" }) // Example: Resize to width 800px, adjust as needed
+    transform(chunk, _, callback) {
+      this.chunks = this.chunks || [];
+      this.chunks.push(chunk);
+      callback();
+    },
+
+    flush(callback) {
+      const fullimageBuffer = Buffer.concat(this.chunks);
+
+      sharp(fullimageBuffer)
+        .resize(options)
         .toBuffer()
         .then((data) => callback(null, data))
         .catch((err) => callback(err));
     },
   });
 
-  pipeline(readStream, imageResizer, writeStream, (err) => {
-    (err) => (err ? console.error(err) : console.log("Done!"));
+  readStream.on("error", (err) => {
+    console.log(err);
   });
 
   readStream.on("end", () => {
-    console.log("finish reading the image buffer");
+    console.log("Finished Reading Image Buffer");
   });
 
-  writeStream.on("finish", () => {
+  imageResizer.on("finishc", () => {
+    console.log("image resizing complete");
+  });
+
+  writeStream.on("error", (err) => console.error(err));
+
+  writeStream.on("end", () => {
     console.log("image resized !! ");
+  });
+
+  pipeline(readStream, imageResizer, writeStream, (err) => {
+    err ? console.log(err) : console.log("Done");
   });
 }

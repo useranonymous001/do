@@ -26,10 +26,18 @@ async function computeHash(filePath, alg) {
   });
 }
 
-export default async function verify_hash(inputFilePath, algorithm) {
+export default async function verify_hash(
+  inputFilePath,
+  algorithm,
+  hashFilePath
+) {
   try {
-    const currentHash = await computeHash(inputFilePath, algorithm);
-    const storedhash = fs.readFileSync("hashed_data.txt", "utf-8");
+    const currentHash = await computeHash(
+      inputFilePath,
+      algorithm,
+      hashFilePath
+    );
+    const storedhash = fs.readFileSync(hashFilePath, "utf-8");
 
     if (currentHash === storedhash) {
       console.log("integrity verified");

@@ -7,9 +7,8 @@
 
 */
 
-import { Transform } from "node:stream";
 import path from "node:path";
-import fs, { read } from "node:fs";
+import fs from "node:fs";
 
 export default async function viewfile(inputFilepath) {
   try {
@@ -20,6 +19,7 @@ export default async function viewfile(inputFilepath) {
     readStream.on("data", (chunk) => {
       console.log("Chunk: ", chunk.toString() + `\n`);
       readStream.pause();
+      console.log("Continue (n) | Quit (q)");
     });
 
     readStream.on("end", () => {
