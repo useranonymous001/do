@@ -10,27 +10,37 @@
 
 import fs from "node:fs";
 import zlib from "node:zlib";
+import path from "node:path";
 
 export default async function compress(inputFilePath, outputFilePath) {
   try {
-    const readStream = fs.createReadStream(inputFilePath);
-    const writeStream = fs.createWriteStream(outputFilePath);
+    const sourcePath = path.resolve(inputFilePath);
+
+    const destPath = outputFilePath
+      ? path.resolve(outputFilePath)
+      : `compressed_${path
+          .basename(sourcePath)
+          .split(".")
+          .slice(0, -1)
+          .join("")}${path.extname(path.basename(sourcePath))}.gz`;
+
+    const readStream = fs.createReadStream(sourcePath);
+    const writeStream = fs.createWriteStream(destPath);
 
     const gzip = zlib.createGzip();
 
-    readStream.pipe(gzip).pipe(writeStream);
-
     writeStream.on("finish", () => {
-      console.log("all data has been flushed to the underlying system...");
+      console.log("Done !!");
     });
 
     readStream.on("end", () => {
-      console.log("no more data to be consumed..");
+      console.log("Reading Source Complete");
     });
 
     readStream.on("error", (error) => {
       console.log(`Error in compresing: ${error.message}`);
     });
+    readStream.pipe(gzip).pipe(writeStream);
   } catch (error) {
     console.error(error.message);
   }

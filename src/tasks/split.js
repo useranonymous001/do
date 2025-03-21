@@ -5,23 +5,32 @@
  *  args: large_file.txt,   foder_to_store_chunks
  *
  * todo: need to optimize more to create less folders.
- *
+ * todo: use pipeline and more error handler to create error and faster processing
  */
 
 import fs from "node:fs";
 import util from "node:util";
+import path from "node:path";
 
 export default async function split(inputFilePath, outputDir) {
   let chunk_index = 1;
   const mkdir = util.promisify(fs.mkdir);
-  await mkdir(outputDir, { recursive: true });
-
+  const destDir = outputDir
+    ? path.dirname(path.resolve(outputDir))
+    : `OUTPUT_FILES`;
+  await mkdir(destDir, { recursive: true });
   try {
-    const readStream = fs.createReadStream(inputFilePath);
+    const sourcePath = path.resolve(inputFilePath);
+
+    const readStream = fs.createReadStream(sourcePath, {
+      highWaterMark: 64 * 1024,
+    });
 
     readStream.on("data", (chunk) => {
-      const filepath = `${outputDir}/chunk_${chunk_index}`;
-      const writeStream = fs.createWriteStream(filepath);
+      const filepath = `${destDir}/chunk_${chunk_index}`;
+      const writeStream = fs.createWriteStream(filepath, {
+        highWaterMark: 64 * 1024 * 10,
+      });
 
       if (!writeStream.write(chunk)) {
         readStream.pause();
@@ -31,6 +40,10 @@ export default async function split(inputFilePath, outputDir) {
         readStream.resume();
       });
       writeStream.on("finish", () => {
+        console.log(`Wrote ${chunk_index} chunk of data to ${filepath}`);
+      });
+
+      readStream.on("end", () => {
         console.log(`Wrote ${chunk_index} chunk of data to ${filepath}`);
       });
 

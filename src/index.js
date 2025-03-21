@@ -8,7 +8,12 @@ import { program } from "commander";
 const processor = new FileProcessor(path.resolve("./tasks"), 4);
 await processor.loadTasks();
 
-program.name("do").description("cli tool").version("1.0.1");
+program
+  .name("do")
+  .description(
+    " 'do' is a nodejs based cli tool for manipulating files and data"
+  )
+  .version("1.0.1");
 
 // await processor.tasks.hash("merged.txt", "sha256", "hashed.txt");
 program
@@ -93,11 +98,33 @@ program
   });
 
 // await processor.tasks.compress("src.txt", "compressed.txt.gz");
+program
+  .command("compress")
+  .description("compress the given file using gzip")
+  .argument("<filepath>", "path to the file to compress")
+  .option("-o, --output <char>", "file path to the output")
+  .action(async (args, options) => {
+    await processor.tasks.compress(args, options?.output);
+  });
+
 // await processor.tasks.split("src.txt", "CHUNKS");
+program
+  .command("split")
+  .description("split the data of the given file into multiple files in chunks")
+  .argument("<filepath>", "path to the file to split")
+  .option("-o, --output <char>", "file path to the output dir")
+  .action(async (args, options) => {
+    await processor.tasks.split(args, options?.output);
+  });
+
 // await processor.tasks.linecount("src.txt");
+program.command("merge").description("merge multiple files into a single file");
+program.command("encrypt").description("encrypt any file using encryption key");
+program.command("decrypt").description("decrypt the encrypted file");
+
 // await processor.tasks.merge("CHUNKS", "merged.txt");
 // await processor.tasks.encrypt(
-//   "merged.txt",
+////   "merged.decrypt",   "merged.txt",
 //   "12345678901234567890123456789012"
 // ); // it takes 24 bit key
 // await processor.tasks.decrypt(
